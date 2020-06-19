@@ -47,8 +47,7 @@ jobs:
         ref: ${{ github.ref }}
         environment: dev
         auto_merge: false
-        payload: 
-          service: test
-          version: v0.1
+        service: test
+        version: v0.1
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
