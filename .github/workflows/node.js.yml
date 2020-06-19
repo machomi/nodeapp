@@ -20,24 +20,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run build --if-present
-#     - run: npm test
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v1.1.0
-      with:
-        # Username used to log in to a Docker registry. If not set then no login will occur
-        username: ${{ secrets.DOCKER_USERNAME }}
-        # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        # Docker repository to tag the image with
-        repository: machomi/nodeapp
-        tag_with_ref: true
-        tag_with_sha: true
+#     - name: Use Node.js ${{ matrix.node-version }}
+#       uses: actions/setup-node@v1
+#       with:
+#         node-version: ${{ matrix.node-version }}
+#     - run: npm ci
+#     - run: npm run build --if-present
+# #     - run: npm test
+#     - name: Build and push Docker images
+#       uses: docker/build-push-action@v1.1.0
+#       with:
+#         # Username used to log in to a Docker registry. If not set then no login will occur
+#         username: ${{ secrets.DOCKER_USERNAME }}
+#         # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+#         password: ${{ secrets.DOCKER_PASSWORD }}
+#         # Docker repository to tag the image with
+#         repository: machomi/nodeapp
+#         tag_with_ref: true
+        # tag_with_sha: true
     - name: create deployment
       id: create_deployment
       uses: octokit/request-action@v2.x
@@ -49,5 +49,21 @@ jobs:
         auto_merge: false
         service: test
         version: v0.1
+        required_contexts: "[]"
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+    - name: set deployment status to in progress
+      id: start_deployment
+      uses: octokit/request-action@v2.x
+      with:
+        route: POST /repos/:repository/deployments/:deployment/statuses
+        repository: ${{ github.repository }}
+        deployment: ${{ fromJson(steps.create_deployment.outputs.data).id }}
+        environment: dev
+        environment_url: https://example.com
+        log_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        state: in_progress
+        mediaType: '{"previews": ["flash", "ant-man"]}'
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"        
