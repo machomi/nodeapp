@@ -38,3 +38,17 @@ jobs:
         repository: machomi/nodeapp
         tag_with_ref: true
         tag_with_sha: true
+    - name: create deployment
+      id: create_deployment
+      uses: octokit/request-action@v2.x
+      with:
+        route: POST /repos/:repository/deployments
+        repository: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        environment: dev
+        auto_merge: false
+        payload: 
+          service: test
+          version: v0.1
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
